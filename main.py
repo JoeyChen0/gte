@@ -62,7 +62,7 @@ def import_game(game):
 
 
 def main(args):
-    files = glob.glob('**/*onegame.pgn',recursive=True)
+    files = glob.glob('**/*.pgn',recursive=True)
     all_games = sum([parse(file) for file in files], [])
     games_df = pd.DataFrame(all_games)
 
