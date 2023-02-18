@@ -8,14 +8,19 @@ import webbrowser
 
 
 def key(x):
-    if (x[0] == '1'):
+    if (x[0] != '['):
        return "Moves"
     return x.split(' "')[0][1:]
 
 def val(x):
-    if (x[0] == '1'):
+    if (x[0] != '['):
         return x
-    return x.split(' "')[1][:-2]
+    try:
+        return x.split(' "')[1][:-2]
+    except IndexError:
+        print(x)
+        raise Exception
+    
 
 def parse(target):
     file = open(target, "r").read()
@@ -57,7 +62,7 @@ def import_game(game):
 
 
 def main(args):
-    files = glob.glob('**/*.pgn',recursive=True)
+    files = glob.glob('**/*onegame.pgn',recursive=True)
     all_games = sum([parse(file) for file in files], [])
     games_df = pd.DataFrame(all_games)
 
