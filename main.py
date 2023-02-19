@@ -5,7 +5,10 @@ import pandas as pd
 import requests
 import json
 import webbrowser
+import re
+import getopt
 
+MIN_MOVES = 10
 
 def key(x):
     if (x[0] != '['):
@@ -14,19 +17,30 @@ def key(x):
 
 def val(x):
     if (x[0] != '['):
-        return x
+        return hide_time(x)
     try:
         return x.split(' "')[1][:-2]
     except IndexError:
         print(x)
         raise Exception
-    
+
 
 def parse(target):
     file = open(target, "r").read()
     games = file.split('\n\n\n')
     games = [i.split('\n') for i in games]
     return [{key(i): val(i) for i in game if i} for game in games]
+
+def game_length(moves):
+    result = re.findall('\d+\.', moves)
+    if (not result):
+        return 0
+    return int(result[-1][0:-1])
+
+
+def filter_games(games, min_moves):
+    return games[games['Moves'].map(game_length) > min_moves]
+
 
 def hide_time(moves):
     edited = ""
@@ -50,7 +64,7 @@ def anonymise(game):
     else:
         lichess = game['Site']
 
-    moves = hide_time(game['Moves'])
+    moves = game['Moves']
 
     return f'[White "{chesscom}"]\n[Black "{lichess}"]\n{moves}'
 
@@ -65,6 +79,7 @@ def main(args):
     files = glob.glob('**/*.pgn',recursive=True)
     all_games = sum([parse(file) for file in files], [])
     games_df = pd.DataFrame(all_games)
+    games_df = filter_games(games_df, MIN_MOVES)
 
     num = 1
     if args:
@@ -79,3 +94,4 @@ def main(args):
 
 if __name__ == '__main__':
     main(sys.argv[1:])
+
