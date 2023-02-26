@@ -65,8 +65,10 @@ def anonymise(game):
         lichess = game['Site']
 
     moves = game['Moves']
+    white = game['White']
+    black = game['Black']
 
-    return f'[White "{chesscom}"]\n[Black "{lichess}"]\n{moves}'
+    return f'[Event "{white} vs {black}"]\n[White "{chesscom}"]\n[Black "{lichess}"]\n[Annotator "Joey"]\n{moves}{{ test }}'
 
 def import_game(game):
     pgn = anonymise(game)
