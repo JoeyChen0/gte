@@ -1,1 +1,3 @@
-.pgn
+**/*.pgn
+__pycache__/
+*.py[cod]
