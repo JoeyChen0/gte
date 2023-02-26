@@ -1,19 +1,19 @@
 import glob
 import sys
-import numpy as np
 import pandas as pd
 import requests
 import json
 import webbrowser
 import re
-import getopt
 
 MIN_MOVES = 10
 
+
 def key(x):
     if (x[0] != '['):
-       return "Moves"
+        return "Moves"
     return x.split(' "')[0][1:]
+
 
 def val(x):
     if (x[0] != '['):
@@ -31,8 +31,9 @@ def parse(target):
     games = [i.split('\n') for i in games]
     return [{key(i): val(i) for i in game if i} for game in games]
 
+
 def game_length(moves):
-    result = re.findall('\d+\.', moves)
+    result = re.findall(r'\d+\.', moves)
     if (not result):
         return 0
     return int(result[-1][0:-1])
@@ -55,6 +56,7 @@ def hide_time(moves):
             clock = False
     return edited
 
+
 def anonymise(game):
     chesscom = 'chess.com'
     lichess = 'lichess.org'
@@ -70,6 +72,7 @@ def anonymise(game):
 
     return f'[Event "{white} vs {black}"]\n[White "{chesscom}"]\n[Black "{lichess}"]\n[Annotator "Joey"]\n{moves}{{ test }}'
 
+
 def import_game(game):
     pgn = anonymise(game)
     URL = 'https://lichess.org/api/import'
@@ -78,7 +81,7 @@ def import_game(game):
 
 
 def main(args):
-    files = glob.glob('**/*.pgn',recursive=True)
+    files = glob.glob('**/*.pgn', recursive=True)
     all_games = sum([parse(file) for file in files], [])
     games_df = pd.DataFrame(all_games)
     games_df = filter_games(games_df, MIN_MOVES)
@@ -89,11 +92,10 @@ def main(args):
 
     games = games_df.sample(num)
 
-    for _,game in games.iterrows():
+    for _, game in games.iterrows():
         url = import_game(game)
         webbrowser.open(url)
 
 
 if __name__ == '__main__':
     main(sys.argv[1:])
-
