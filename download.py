@@ -1,11 +1,11 @@
 
-import requests
+from requests import get
 import sys
-import getopt
-import time
-import datetime
+from getopt import getopt, GetoptError
+from time import time
+from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
-import re
+from re import search
 
 lichess_URL = 'https://lichess.org/api/games/user/hikaru'
 
@@ -20,7 +20,7 @@ usage: download.py <args> <username>
 '''
 
 LICHESS_EPOCH = 1356998400070
-EPOCH = datetime.datetime.utcfromtimestamp(0).date()
+EPOCH = datetime.utcfromtimestamp(0).date()
 
 
 def add_months(date, duration):
@@ -32,7 +32,7 @@ def diff_month(d1, d2):
 
 
 def get_date_range(start, duration):
-    end = datetime.date.today()
+    end = date.today()
     if (start is None):
         if (duration is None):
             duration = 0
@@ -65,7 +65,7 @@ def get_lichess_pgns(username, date_range, path):
         'until': until,
         'evals': False
     }
-    r = requests.get(url=url, params=params)
+    r = get(url=url, params=params)
     write_to_file(r, path)
 
 
@@ -82,12 +82,12 @@ def get_chesscom_urls(username, date_range):
 def get_chesscom_pgns(username, date_range, path):
     urls = get_chesscom_urls(username, date_range)
     for url in urls:
-        r = requests.get(url)
+        r = get(url)
         write_to_file(r, path)
 
 
 def main(opts, args):
-    filename = f'{time.time()}.pgn'
+    filename = f'{time()}.pgn'
 
     chesscom = None
     lichess = None
@@ -103,14 +103,14 @@ def main(opts, args):
         elif o == '-c':
             chesscom = a
         elif o == '-f':
-            if (re.search(r'.*\.pgn', a)):
+            if (search(r'.*\.pgn', a)):
                 filename = a
             else:
                 filename = f'{a}/{filename}'
         elif o == '-d' or o == '--duration':
             duration = int(a)
         elif o == '-s' or o == '--start':
-            start = datetime.datetime.strptime(a, "%d/%m/%y").date()
+            start = datetime.strptime(a, "%d/%m/%y").date()
 
     if (lichess is None and chesscom is None):
         print(USAGE_MSG)
@@ -126,8 +126,8 @@ def main(opts, args):
 if __name__ == '__main__':
     argv = sys.argv[1:]
     try:
-        opts, args = getopt.getopt(argv, ":c:l:f:d:m:s:h", longopts=["start=", "duration="])
+        opts, args = getopt(argv, ":c:l:f:d:m:s:h", longopts=["start=", "duration="])
         main(opts, args)
 
-    except getopt.GetoptError as error:
+    except GetoptError as error:
         print(error.msg)

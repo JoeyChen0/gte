@@ -1,10 +1,9 @@
-import glob
-import sys
+from glob import glob
 import pandas as pd
-import requests
-import json
+from requests import post
+from json import loads
 import webbrowser
-import re
+from re import findall
 
 MIN_MOVES = 10
 
@@ -33,7 +32,7 @@ def parse(target):
 
 
 def game_length(moves):
-    result = re.findall(r'\d+\.', moves)
+    result = findall(r'\d+\.', moves)
     if (not result):
         return 0
     return int(result[-1][0:-1])
@@ -76,21 +75,17 @@ def anonymise(game):
 def import_game(game):
     pgn = anonymise(game)
     URL = 'https://lichess.org/api/import'
-    r = requests.post(url=URL, data={'pgn': pgn})
-    return json.loads(r.text)['url']
+    r = post(url=URL, data={'pgn': pgn})
+    return loads(r.text)['url']
 
 
-def main(args):
-    files = glob.glob('**/*.pgn', recursive=True)
+def main():
+    files = glob('**/*.pgn', recursive=True)
     all_games = sum([parse(file) for file in files], [])
     games_df = pd.DataFrame(all_games)
     games_df = filter_games(games_df, MIN_MOVES)
 
-    num = 1
-    if args:
-        num = int(args[0])
-
-    games = games_df.sample(num)
+    games = games_df.sample()
 
     for _, game in games.iterrows():
         url = import_game(game)
@@ -98,4 +93,4 @@ def main(args):
 
 
 if __name__ == '__main__':
-    main(sys.argv[1:])
+    main()
