@@ -57,20 +57,32 @@ def hide_time(moves):
     return edited
 
 
+def chesscom_termination(game):
+    match game['Result']:
+        case '1-0':
+            return game['Termination'].replace(game['White'], 'White')
+        case '0-1':
+            return game['Termination'].replace(game['Black'], 'Black')
+        case _:
+            return game['Termination']
+
+
 def anonymise(game):
-    chesscom = 'chess.com'
-    lichess = 'lichess.org'
+    username = 'chess.com'
+    termination = 'normal'
 
     if 'Chess.com' in game['Site']:
-        chesscom = game['Link']
+        username = game['Link']
+        termination = chesscom_termination(game)
     else:
-        lichess = game['Site']
+        username = game['Site']
+        termination = game['Termination']
 
     moves = game['Moves']
     white = game['White']
     black = game['Black']
 
-    return f'[Event "{white} vs {black}"]\n[White "{chesscom}"]\n[Black "{lichess}"]\n[Annotator "Joey"]\n{moves}{{ test }}'
+    return f'[Event "{white} vs {black}"]\n[White "{username}"]\n[Black "{termination}"]\n{moves}'
 
 
 def import_game(game):
@@ -81,8 +93,8 @@ def import_game(game):
 
 
 def main():
-    files = glob('**/*.pgn', recursive=True)
-    games = [filter_games(DataFrame(parse(file)),MIN_MOVES) for file in files]
+    files = glob('**/hikaru.pgn', recursive=True)
+    games = [filter_games(DataFrame(parse(file)), MIN_MOVES) for file in files]
 
     game = choice(games).sample().squeeze()
     url = import_game(game)
