@@ -1,9 +1,10 @@
 from glob import glob
-import pandas as pd
+from pandas import DataFrame
 from requests import post
 from json import loads
 import webbrowser
 from re import findall
+from random import choice
 
 MIN_MOVES = 10
 
@@ -81,15 +82,11 @@ def import_game(game):
 
 def main():
     files = glob('**/*.pgn', recursive=True)
-    all_games = sum([parse(file) for file in files], [])
-    games_df = pd.DataFrame(all_games)
-    games_df = filter_games(games_df, MIN_MOVES)
+    games = [filter_games(DataFrame(parse(file)),MIN_MOVES) for file in files]
 
-    games = games_df.sample()
-
-    for _, game in games.iterrows():
-        url = import_game(game)
-        webbrowser.open(url)
+    game = choice(games).sample().squeeze()
+    url = import_game(game)
+    webbrowser.open(url)
 
 
 if __name__ == '__main__':
