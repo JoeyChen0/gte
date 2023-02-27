@@ -93,7 +93,7 @@ def import_game(game):
 
 
 def main():
-    files = glob('**/hikaru.pgn', recursive=True)
+    files = glob('**/*.pgn', recursive=True)
     games = [filter_games(DataFrame(parse(file)), MIN_MOVES) for file in files]
 
     game = choice(games).sample().squeeze()
