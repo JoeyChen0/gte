@@ -5,6 +5,7 @@ from json import loads
 import webbrowser
 from re import findall
 from random import choice
+from makehtml import makepage
 
 MIN_MOVES = 10
 
@@ -57,36 +58,8 @@ def hide_time(moves):
     return edited
 
 
-def chesscom_termination(game):
-    match game['Result']:
-        case '1-0':
-            return game['Termination'].replace(game['White'], 'White')
-        case '0-1':
-            return game['Termination'].replace(game['Black'], 'Black')
-        case _:
-            return game['Termination']
-
-
-def anonymise(game):
-    username = 'chess.com'
-    termination = 'normal'
-
-    if 'Chess.com' in game['Site']:
-        username = game['Link']
-        termination = chesscom_termination(game)
-    else:
-        username = game['Site']
-        termination = game['Termination']
-
-    moves = game['Moves']
-    white = game['White']
-    black = game['Black']
-
-    return f'[Event "{white} vs {black}"]\n[White "{username}"]\n[Black "{termination}"]\n{moves}'
-
-
 def import_game(game):
-    pgn = anonymise(game)
+    pgn = game['Moves']
     URL = 'https://lichess.org/api/import'
     r = post(url=URL, data={'pgn': pgn})
     return loads(r.text)['url']
@@ -98,7 +71,9 @@ def main():
 
     game = choice(games).sample().squeeze()
     url = import_game(game)
-    webbrowser.open(url)
+    file = 'out/file.html'
+    makepage(file, game, url)
+    webbrowser.open(file)
 
 
 if __name__ == '__main__':
